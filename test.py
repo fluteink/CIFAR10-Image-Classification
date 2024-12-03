@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from vit_pytorch import ViT, SimpleViT
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def main():
@@ -29,12 +29,12 @@ def main():
                               std=[0.229, 0.224, 0.225])])  # 对数据按通道进行标准化，即先减均值，再除以标准差，注意是 hwc
 
     trainset = torchvision.datasets.CIFAR10(root="./cifar10", train=True, download=True, transform=trans_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=1024, shuffle=True, num_workers=32,pin_memory=True)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=512, shuffle=True, num_workers=8)
 
     testset = torchvision.datasets.CIFAR10(root='./cifar10', train=False,
                                            download=False, transform=trans_valid)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=1024,
-                                             shuffle=False, num_workers=32,pin_memory=True)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=512,
+                                             shuffle=False, num_workers=8)
 
     classes = ('plane', 'car', 'bird', 'cat',
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -51,8 +51,8 @@ def main():
     model = get_vit_model()
 
     # 使用 DataParallel 包装模型以支持多 GPU
-    model = nn.DataParallel(model)  # 自动使用所有可用的 GPU
-    model = model.to(device)
+    #model = nn.DataParallel(model)  # 自动使用所有可用的 GPU
+    #model = model.to(device)
 
     # 查看总参数及训练参数
     total_params = sum(p.numel() for p in model.parameters())
