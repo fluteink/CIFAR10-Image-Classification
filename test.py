@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from vit_pytorch import ViT, SimpleViT
 
-device = torch.device("cuda:0,1,2,3" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main():
@@ -29,18 +29,18 @@ def main():
                               std=[0.229, 0.224, 0.225])])  # 对数据按通道进行标准化，即先减均值，再除以标准差，注意是 hwc
 
     trainset = torchvision.datasets.CIFAR10(root="./cifar10", train=True, download=True, transform=trans_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=256, shuffle=True, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=1024, shuffle=True, num_workers=32,pin_memory=True)
 
     testset = torchvision.datasets.CIFAR10(root='./cifar10', train=False,
                                            download=False, transform=trans_valid)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=256,
-                                             shuffle=False, num_workers=2)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=1024,
+                                             shuffle=False, num_workers=32,pin_memory=True)
 
     classes = ('plane', 'car', 'bird', 'cat',
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
     # 随机获取部分训练数据
     dataiter = iter(trainloader)
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     # 显示图像
     # imshow(torchvision.utils.make_grid(images[:4]))
@@ -49,6 +49,10 @@ def main():
 
     # 使用预训练模型
     model = get_vit_model()
+
+    # 使用 DataParallel 包装模型以支持多 GPU
+    model = nn.DataParallel(model)  # 自动使用所有可用的 GPU
+    model = model.to(device)
 
     # 查看总参数及训练参数
     total_params = sum(p.numel() for p in model.parameters())
@@ -131,7 +135,7 @@ def train(net, train_data, valid_data, num_epochs, optimizer, criterion):
 def get_vit_model():
     v = SimpleViT(
         image_size=224,
-        patch_size=16,
+        patch_size=32,
         num_classes=10,
         dim=256,
         depth=2,
