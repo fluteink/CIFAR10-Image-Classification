@@ -46,7 +46,7 @@ python train.py --auxiliary --batch_size=32 --init_ch=128 --layer=24 --arch='[2,
 
 ## 测试LaNet
 
-1. 可以从 <a href="https://drive.google.com/file/d/1bZsEoG-sroVyYR4F_2ozGLA5W50CT84P/view?usp=sharing">这里</a>下载官方作者的预训练权重文件, 然后解压并将它替换到CIFAR10文件的checkpoint文件夹中
+1. 可以从<a href="https://drive.google.com/file/d/1bZsEoG-sroVyYR4F_2ozGLA5W50CT84P/view?usp=sharing">这里</a>下载官方作者的预训练权重文件, 然后解压并将它替换到CIFAR10文件夹内的checkpoint文件夹中
 
 2. 运行以下命令进行测试.
 ```
